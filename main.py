@@ -1,44 +1,27 @@
 from math import floor
 import csv
 from sfwords import isSquareFree
-# from square_free_word_generator import generate_square_free_words_up_to_length
 from ast import literal_eval
+import json
 
-PATH_TO_WORDS = "square_free_words/"
-PATH_TO_MORPHISMS = "morphisms/"
+
+def get_config_data():
+    global PATH_TO_WORDS
+    global PATH_TO_MORPHISMS
+
+    r = open('config.json', 'r')
+    encoded_data = r.read()
+
+    config_object = json.loads(encoded_data)
+    r.close()
+
+    PATH_TO_MORPHISMS = config_object['PATH_TO_MORPHISMS']
+    PATH_TO_WORDS = config_object['PATH_TO_WORDS']
+
+    return
+
 
 def main():
-    # example_morphism_base = [
-    #     [0, 1, 2, 0, 1],
-    #     [0, 2, 0, 1, 2, 1],
-    #     [0, 2, 1, 2, 0, 2, 1]
-    # ]
-
-    if check_if_factor_of([0,1], [3,4,0,1,4,2,3]):
-        print("TELHLFDJS")
-
-    example_morphism_base = [
-        [0,1,2,3,4,5,6, 0, 7],
-        [1,2],
-        [3,4],
-        [5,6]
-    ]
-
-    example_input_word = [0, 1, 2]
-    #
-    # # First method of applying morphism
-    # example_output_word_one = apply_morphism_to_word(example_input_word, example_morphism_base)
-    #
-    # # Second method of applying morphism
-    example_morphism_function = create_morphism_from_base(example_morphism_base)
-    example_output_word_two = example_morphism_function(example_input_word)
-    #
-    # print(example_output_word_one == example_output_word_two)
-    # print(example_output_word_one)
-    print(example_output_word_two)
-
-    test_result = test_morphism_square_free(example_morphism_base)
-    print(test_result)
 
     return
 
@@ -327,11 +310,6 @@ def generate_alphabet_of_given_size(alphabet_size):
     return list(range(alphabet_size))
 
 
-generate_morphisms_up_to_given_size(3, 10)
-# main()
-# list_of_lists_of_lists = [
-#     [[0,1,2], [0,2,3]],
-#     [[4,5], [3,4]]
-# ]
-# fill_csv_with_words("test.csv", list_of_lists_of_lists)
-# print(read_morphisms_from_csv("test.csv")[0][0][1])
+get_config_data()
+# print(PATH_TO_WORDS)
+# generate_morphisms_up_to_given_size(4, 10)
