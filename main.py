@@ -53,7 +53,6 @@ def generate_morphisms_up_to_given_size(size_of_input_alphabet, max_size_of_each
                        str(max_size_of_each_morphism_chunk) + "_morphisms.csv"
         try:
             list_of_old_size_morphisms = read_morphisms_from_csv(old_filename)
-            print(list_of_old_size_morphisms)
             list_of_current_size_morphisms = generate_morphisms_of_next_size(list_of_old_size_morphisms, max_size_of_each_morphism_chunk)
         except FileNotFoundError:
             generate_morphisms_up_to_given_size(size_of_input_alphabet - 1, max_size_of_each_morphism_chunk)
@@ -71,23 +70,53 @@ def generate_morphisms_up_to_given_size(size_of_input_alphabet, max_size_of_each
     return
 
 
+# Requires list_of_old_size_morphisms come in a certain order
 def generate_morphisms_of_next_size(list_of_old_size_morphisms, max_size_of_each_morphism_chunk):
     global PATH_TO_WORDS
 
     list_of_current_size_morphisms = [] # Initial decleration
 
-    list_of_possible_words = []
-    for i in range(1, max_size_of_each_morphism_chunk + 1):
-        words_filename = PATH_TO_WORDS + str(i) + "_letter_square_free_words.csv"
-        list_of_possible_words = list_of_possible_words + read_words_from_csv(words_filename)   # Is there more efficient way to do this?
+    if len(list_of_old_size_morphisms[0]) == 1:
+        list_of_possible_words = []
+        for i in range(1, max_size_of_each_morphism_chunk + 1):
+            words_filename = PATH_TO_WORDS + str(i) + "_letter_square_free_words.csv"
+            list_of_possible_words = list_of_possible_words + read_words_from_csv(words_filename)   # Is there more efficient way to do this?
 
-    for old_morphism in list_of_old_size_morphisms:
-        for word in list_of_possible_words:
-            new_morphism = old_morphism + [word]
-            if test_morphism_square_free(new_morphism):
-                list_of_current_size_morphisms.append(new_morphism)
+        for old_morphism in list_of_old_size_morphisms:
+            for word in list_of_possible_words:
+                new_morphism = old_morphism + [word]
+                if test_morphism_square_free(new_morphism):
+                    list_of_current_size_morphisms.append(new_morphism)
+    else:
+        possible_first_elements_with_duplication = [morphism[0] for morphism in list_of_old_size_morphisms]
+        possible_first_elements = [possible_first_elements_with_duplication[0]] # Initial decleration
+        for possible_first_element in possible_first_elements_with_duplication:
+            if possible_first_element != possible_first_elements[-1]:   # Uses the fact that the list is already sorted
+                possible_first_elements.append(possible_first_element)
+
+        for possible_first_element in possible_first_elements:
+            morphisms_with_given_first_element = [
+                morphism for morphism in list_of_old_size_morphisms if morphism[0] == possible_first_element]
+
+            list_of_morphisms_with_first_element_removed = [
+                morphism[1:] for morphism in morphisms_with_given_first_element]
+
+            list_of_possible_morphism_ends_with_given_first_element = generate_morphisms_of_next_size(
+                list_of_morphisms_with_first_element_removed, max_size_of_each_morphism_chunk)
+
+            for morphism_end in list_of_possible_morphism_ends_with_given_first_element:
+                possible_morphism = [possible_first_element] + morphism_end
+                if test_morphism_square_free(possible_morphism):
+                    list_of_current_size_morphisms.append(possible_morphism)
+
 
     return list_of_current_size_morphisms
+
+
+def break_into_arrays_based_on_first_element(array):
+
+
+    return
 
 
 # Second method of applying morphisms
@@ -113,7 +142,7 @@ def ruler_morphism(input_word):
 # Returns True if it passes the square-free test
 def test_morphism_square_free(morphism_base):
     if not does_pass_all_three_letter_checks(morphism_base):
-        print("FAILED TO PASS THREE LETTER CHECKS")
+        # print("FAILED TO PASS THREE LETTER CHECKS")
         return False
     else:
         size_of_alphbet = len(morphism_base)
@@ -130,7 +159,7 @@ def test_morphism_square_free(morphism_base):
                             if isSquareFree(possible_word):
                                 morphed_word = morphism_function(possible_word)
                                 if not isSquareFree(morphed_word):
-                                    print("FAILED TO PASS CONTAINED WORDS CHECK")
+                                    # print("FAILED TO PASS CONTAINED WORDS CHECK")
                                     return False
 
     return True
@@ -312,4 +341,4 @@ def generate_alphabet_of_given_size(alphabet_size):
 
 get_config_data()
 # print(PATH_TO_WORDS)
-# generate_morphisms_up_to_given_size(4, 10)
+generate_morphisms_up_to_given_size(4, 10)
